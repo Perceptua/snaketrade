@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from pytrade.auth import Auth
+from snaketrade.auth import Auth
 from rauth import OAuth1Service
 import unittest as ut
 
