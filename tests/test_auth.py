@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 from snaketrade.auth import Auth
-from rauth import OAuth1Service
+from rauth import OAuth1Service, OAuth1Session
 import unittest as ut
+import webbrowser
 
 
 class TestAuth(ut.TestCase):
@@ -109,6 +110,12 @@ class TestAuth(ut.TestCase):
         self.assertIsInstance(auth.request_token_secret, str)
         self.assertIn('https://us.etrade.com/e/t/etws', auth.authorize_url)
         
-
-if __name__ == '__main__':
-    ut.main()
+    def testMakeSession(self):
+        env = 'sandbox'
+        auth = Auth(env)
+        auth.set_auth_components()
+        webbrowser.open(auth.authorize_url)
+        verification_code = input('Enter verification code: ')
+        auth.make_session(verification_code)
+        self.assertIsInstance(auth.session, OAuth1Session)
+        
