@@ -1,16 +1,25 @@
-<div id="authorize">
-    <p><a target="_blank" href="/authorize/sandbox">Authorize Sandbox</a></p>
-    <p><a target="_blank" href="/authorize/live">Authorize Live</a></p>
-</div>
+<header>
+    <h1><a href="/">snaketrade</a><h1>
+</header>
 
-<div id="verify">
-    <form action="/verify" method="post">
-      <label for="verification_code">Enter verification code:</label>
-      <br>
-      <input type="text" id="verification_code" name="verification_code">
-      <br>
-      <br>
-      <input type="submit" value="Verify">
-    </form>
-</div>
-
+<body>
+    <div id="authorize">
+        <h2>Authorize</h2>
+        <p>Click a link below to authorize snaketrade.</p>
+        <p><a target="_blank" href="/authorize/sandbox">Authorize Sandbox</a></p>
+        <p><a target="_blank" href="/authorize/prod">Authorize Prod</a></p>
+    </div>
+    
+    <div id="verify">
+        <h2>Verify</h2>
+        <p>Enter the verification code from the authorization page.</p>
+        <form action="/verify" method="post">
+          <label for="verification_code">Verification code:</label>
+          <br>
+          <input type="text" id="verification_code" name="verification_code">
+          <br>
+          <br>
+          <input type="submit" value="Verify">
+        </form>
+    </div>
+</body>
