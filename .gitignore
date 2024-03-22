@@ -5,6 +5,7 @@
 # Data files
 *.xlsx
 *.csv
+tests/data/
 
 # Database files
 *.db
