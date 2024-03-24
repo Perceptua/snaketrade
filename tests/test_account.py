@@ -51,11 +51,16 @@ class TestETradeAccount(ut.TestCase):
 
     def testGetAccountTransactions(self):
         account = ETradeAccount(self.auth)
-        test_account = self.test_accounts['0']
+        account_list = account.get_account_list()
+        test_account = account_list[0]
         transactions, info = account.get_account_transactions(test_account)
         self.assertIsInstance(transactions, pd.DataFrame)
+        self.assertGreaterEqual(transactions.shape[0], 1)
+        self.assertIsInstance(info, pd.DataFrame)
+        self.assertEqual(info.shape[0], 1)
 
         if self.env == 'prod':
+            test_account = self.test_accounts['0']
             start_date = datetime.now(tz=timezone.utc) - timedelta(days=100)
             end_date = datetime.now(tz=timezone.utc)
             count_transactions = 1
@@ -95,6 +100,35 @@ class TestETradeAccount(ut.TestCase):
 
             self.assertFalse('marker' in info.columns)
             self.assertEqual(count_transactions, transactions.shape[0])
+
+    def testGetTransactionDetails(self):
+        account = ETradeAccount(self.auth)
+        account_list = account.get_account_list()
+        test_account = account_list[0]
+        transactions, _ = account.get_account_transactions(test_account)
+        transaction_id = transactions.loc[0, 'transactionId']
+
+        transaction_details = account.get_transaction_details(
+            test_account, transaction_id
+        )
+
+        self.assertIsInstance(transaction_details, pd.DataFrame)
+        self.assertEqual(transaction_details.shape[0], 1)
+        self.assertIn('transactionId', list(transaction_details.columns))
+
+        if self.env == 'prod':
+            test_account = self.test_accounts['0']
+            transactions, _ = account.get_account_transactions(test_account)
+            transaction_id = transactions.loc[0, 'transactionId']
+            expected_amount = transactions.loc[0, 'amount']
+
+            transaction_details = account.get_transaction_details(
+                test_account, transaction_id
+            )
+
+            self.assertEqual(
+                transaction_details.loc[0, 'amount'], expected_amount
+            )
 
 
 if __name__ == '__main__':

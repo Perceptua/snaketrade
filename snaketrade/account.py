@@ -82,25 +82,30 @@ class ETradeAccount:
         """
         Get transactions for specified account.
 
+        The default behavior retrieves the 50 most recent transactions. Use
+        optional parameters to specify advanced search criteria.
+
         Parameters
         ----------
         account : dict
             Dictionary of account information returned by get_account_list.
         start_date : str, optional
-            Transaction start date in mmddYYYY format. Transaction history is
+            Optional start date in mmddYYYY format. Transaction history is
             available for two years. The default is None.
         end_date : str, optional
-            Transaction end date in mmddYYYY format. Transaction history is
+            Optional end date in mmddYYYY format. Transaction history is
             available for two years. The default is None.
         sort_order : str, optional
-            Date order of transactions returned. Must be either 'ASC'
+            Optional date order of transactions returned. Must be either 'ASC'
             (ascending) or 'DSC' (descending). The default is None.
         marker : str, optional
-            Optional marker used to retrieve current transaction page. The
-            default is None.
+            If supplied, specifies marker to retrieve page of transactions. If
+            None, the first page matching other search criteria will be
+            returned. The default is None.
         count_transactions : int, optional
-            Number of transactions to be retrieved. If None, the API default of
-            50 transactions will be returned. The default is None.
+            If supplied, specifies number of transactions to be retrieved. If
+            None, the API default of 50 transactions will be returned. The
+            default is None.
 
         Returns
         -------
@@ -152,6 +157,41 @@ class ETradeAccount:
 
         transactions = pd.concat([
             stu.dict_to_dataframe(t) for t in transactions
-        ])
+        ], ignore_index=True)
 
         return transactions, transaction_info
+
+    def get_transaction_details(self, account, transaction_id):
+        """
+        Get details for specified transaction.
+
+        Parameters
+        ----------
+        account : dict
+            Dictionary of account information returned by get_account_list.
+        transaction_id : str
+            ID of transaction to be retrieved.
+
+        Returns
+        -------
+        transaction : pandas.DataFrame
+            Single-row dataframe of transaction details.
+
+        """
+        account_id_key = account['accountIdKey']
+
+        url = '/'.join([
+            self.auth.base_url, 'v1', 'accounts', account_id_key,
+            'transactions', transaction_id
+        ])
+
+        response = self.auth.session.get(
+            url,
+            header_auth=True,
+            headers=self.headers
+        )
+
+        data = stu.parse_response_json(response)
+        transaction = stu.dict_to_dataframe(data['TransactionDetailsResponse'])
+
+        return transaction
