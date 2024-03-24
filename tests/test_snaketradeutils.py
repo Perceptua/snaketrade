@@ -79,7 +79,3 @@ class TestSnakeTradeUtils(ut.TestCase):
 
         date_str = '2024-03-21 15:54:00.000'
         self.assertRaises(ValueError, stu.utc_from_milliseconds, date_str)
-
-
-if __name__ == '__main__':
-    ut.main()
