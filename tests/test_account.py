@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta, timezone
 from snaketrade.account import ETradeAccount
-from snaketrade.auth import Auth
+from snaketrade.auth import ETradeAuth
 from snaketrade.snaketradeutils import SnakeTradeUtils as stu
 import json
 import pandas as pd
@@ -14,7 +14,7 @@ class TestETradeAccount(ut.TestCase):
         cls.env = 'prod'
         cls.date_fmt = '%m%d%Y'
         cls.test_accounts = cls.getTestAccounts()
-        cls.auth = Auth(cls.env)
+        cls.auth = ETradeAuth(cls.env)
         cls.auth.set_auth_components()
         webbrowser.open(cls.auth.authorize_url)
         cls.verification_code = input('Enter verification code: ')
@@ -29,7 +29,7 @@ class TestETradeAccount(ut.TestCase):
 
     def testInit(self):
         account = ETradeAccount(self.auth)
-        self.assertIsInstance(account.auth, Auth)
+        self.assertIsInstance(account.auth, ETradeAuth)
 
     def testGetAccountList(self):
         account = ETradeAccount(self.auth)
