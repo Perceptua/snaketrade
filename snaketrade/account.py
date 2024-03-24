@@ -5,7 +5,7 @@ Use ETradeAccount to list E-Trade accounts, balances, portfolios, &
 transactions.
 """
 from snaketrade.snaketradeutils import SnakeTradeUtils as stu
-import json
+import pandas as pd
 
 
 class ETradeAccount:
@@ -17,6 +17,7 @@ class ETradeAccount:
 
     def __init__(self, auth):
         self.auth = auth
+        self.headers = {'Accept': 'application/json'}
 
     def get_account_list(self):
         """
@@ -29,18 +30,20 @@ class ETradeAccount:
             dictionary of account information.
 
         """
-        url = f'{self.auth.base_url}/v1/accounts/list.json'
-        response = self.auth.session.get(url, header_auth=True)
+        url = f'{self.auth.base_url}/v1/accounts/list'
 
-        if response is not None and response.status_code == 200:
-            data = json.loads(response.text)['AccountListResponse']
-            account_list = data['Accounts']['Account']
-        else:
-            account_list = []
+        response = self.auth.session.get(
+            url,
+            header_auth=True,
+            headers=self.headers
+        )
+
+        data = stu.parse_response_json(response)
+        account_list = data['AccountListResponse']['Accounts']['Account']
 
         return account_list
 
-    def get_account_balance(self, account, account_type=None):
+    def get_account_balance(self, account):
         """
         Get balance information for specified account.
 
@@ -48,34 +51,27 @@ class ETradeAccount:
         ----------
         account : dict
             Dictionary of account information returned by get_account_list.
-        account_type : str, optional
-            Optional account type parameter to send with balance request.
-            Allowable values are detailed at
-            https://apisb.etrade.com/docs/api/account/api-balance-v1.html
 
         Returns
         -------
-        balance_response : str
-            XML-formatted string of account balance information.
+        balance_response : dict
+            Dictionary of account balance information.
 
         """
         institution_type = account['institutionType']
         params = dict(instType=institution_type, realTimeNAV='true')
-
-        if account_type:
-            params['accountType'] = account_type
-
         account_id_key = account['accountIdKey']
         url = f'{self.auth.base_url}/v1/accounts/{account_id_key}/balance'
-        response = self.auth.session.get(url, header_auth=True, params=params)
 
-        if response is not None and response.status_code == 200:
-            balance_response = response.text
-        else:
-            balance_response = ''.join([
-                '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>',
-                '<BalanceResponse></BalanceResponse>'
-            ])
+        response = self.auth.session.get(
+            url,
+            header_auth=True,
+            headers=self.headers,
+            params=params
+        )
+
+        data = stu.parse_response_json(response)
+        balance_response = data['BalanceResponse']
 
         return balance_response
 
@@ -83,6 +79,40 @@ class ETradeAccount:
         self, account, start_date=None, end_date=None, sort_order=None,
         marker=None, count_transactions=None
     ):
+        """
+        Get transactions for specified account.
+
+        Parameters
+        ----------
+        account : dict
+            Dictionary of account information returned by get_account_list.
+        start_date : str, optional
+            Transaction start date in mmddYYYY format. Transaction history is
+            available for two years. The default is None.
+        end_date : str, optional
+            Transaction end date in mmddYYYY format. Transaction history is
+            available for two years. The default is None.
+        sort_order : str, optional
+            Date order of transactions returned. Must be either 'ASC'
+            (ascending) or 'DSC' (descending). The default is None.
+        marker : str, optional
+            Optional marker used to retrieve current transaction page. The
+            default is None.
+        count_transactions : int, optional
+            Number of transactions to be retrieved. If None, the API default of
+            50 transactions will be returned. The default is None.
+
+        Returns
+        -------
+        transactions : pandas.DataFrame
+            Dataframe of account transactions. Dataframe includes one row per
+            transaction.
+        transaction_info : pandas.DataFrame
+            Dataframe of transaction response metadata. If more transactions
+            are available, the URI at transaction_info.next.values[0] can be
+            used to retrieve the next page of transactions.
+
+        """
         date_format = '%m%d%Y'
         params = {}
 
@@ -107,14 +137,21 @@ class ETradeAccount:
 
         account_id_key = account['accountIdKey']
         url = f'{self.auth.base_url}/v1/accounts/{account_id_key}/transactions'
-        response = self.auth.session.get(url, header_auth=True, params=params)
 
-        if response is not None and response.status_code == 200:
-            transaction_list_response = response.text
-        else:
-            transaction_list_response = ''.join([
-                '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>',
-                '<TransactionListResponse></TransactionListResponse>'
-            ])
+        response = self.auth.session.get(
+            url,
+            header_auth=True,
+            headers=self.headers,
+            params=params
+        )
 
-        return transaction_list_response
+        data = stu.parse_response_json(response)
+        transaction_list_response = data['TransactionListResponse']
+        transactions = transaction_list_response.pop('Transaction')
+        transaction_info = stu.dict_to_dataframe(transaction_list_response)
+
+        transactions = pd.concat([
+            stu.dict_to_dataframe(t) for t in transactions
+        ])
+
+        return transactions, transaction_info
