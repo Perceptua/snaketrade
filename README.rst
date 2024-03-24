@@ -1,12 +1,9 @@
-indexia
-=======
+snaketrade
+==========
 
-Collections & connections. A virtual Zettelkasten.
+Automated trading with Python & the E-Trade API.
 
 Installation
 ------------
 
-``pip install indexia``
-
-Visit `indexia.readthedocs.io <https://indexia.readthedocs.io/en/latest/>`_ for 
-full documentation.
+``pip install snaketrade``
