@@ -39,6 +39,18 @@ class TestSnakeTradeUtils(ut.TestCase):
         self.assertEqual(dataframe.shape, expected_shape)
         self.assertIn(dict, value_types)
 
+        sample_json = 'tests/data/sample_portfolio_response_prod.json'
+        sample_data = json.load(open(sample_json))['PortfolioResponse']
+        sample_data = sample_data['AccountPortfolio'][0]['Position'][0]
+        dataframe = stu.dict_to_dataframe(sample_data, flatten=True)
+        self.assertNotIn(True, dataframe.columns.duplicated())
+
+        dataframe = stu.dict_to_dataframe(
+            sample_data, flatten=True, drop_duplicate_columns=False
+        )
+
+        self.assertIn(True, dataframe.columns.duplicated())
+
     def testDictToDataframeList(self):
         sample_json = 'tests/data/sample_transaction_list_response_prod.json'
         sample_data = json.load(open(sample_json))['TransactionListResponse']

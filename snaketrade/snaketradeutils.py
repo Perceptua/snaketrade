@@ -40,7 +40,7 @@ class SnakeTradeUtils:
 
         return data
 
-    def dict_to_dataframe(data, flatten=True):
+    def dict_to_dataframe(data, flatten=True, drop_duplicate_columns=True):
         """
         Parse dictionary data into a single-row dataframe.
 
@@ -54,9 +54,12 @@ class SnakeTradeUtils:
         data : dict
             Dictionary to be parsed into dataframe.
         flatten : bool, optional
-            If true, parse nested dictionaries & concatenate resulting
+            If True, parse nested dictionaries & concatenate resulting
             dataframes to the parent dictionary along axis 1 (columns).
             The default is True.
+        drop_duplicate_columns : bool, optional
+            If True remove any duplicate columns from dataframe after
+            concatenation.
 
         Returns
         -------
@@ -69,14 +72,21 @@ class SnakeTradeUtils:
 
         for key, value in data.items():
             if flatten and type(value) == dict:
-                subframes += [
-                    SnakeTradeUtils.dict_to_dataframe(value, flatten)
-                ]
+                subframe = SnakeTradeUtils.dict_to_dataframe(
+                    value, flatten, drop_duplicate_columns
+                )
+
+                subframes += [subframe]
             else:
                 formatted[key] = [value]
 
         subframes += [pd.DataFrame(data=formatted)]
         dataframe = pd.concat(subframes, axis=1)
+
+        if drop_duplicate_columns:
+            dataframe = dataframe.loc[
+                :, ~dataframe.columns.duplicated()
+            ].copy()
 
         return dataframe
 
