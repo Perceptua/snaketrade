@@ -1,16 +1,20 @@
-##################
-# INDEXIA IGNORE #
-##################
+#####################
+# SNAKETRADE IGNORE #
+#####################
 
 # Data files
 *.xlsx
 *.csv
+tests/data/
 
 # Database files
 *.db
 
 # XML files
 *.xml
+
+# VS Code
+.vscode/
 
 
 ###################
