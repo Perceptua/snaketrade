@@ -1,21 +1,31 @@
 """
 Classes for reading account data.
 
-Use ETradeAccount to list E-Trade accounts, balances, portfolios, &
-transactions.
+Use ETradeAccount to list E-Trade accounts, balances, transactions, &
+portfolios.
+
 """
 from snaketrade.snaketradeutils import SnakeTradeUtils as stu
 import pandas as pd
 
 
 class ETradeAccount:
-    """
-    Get E-Trade account list, balances, portfolios, & transactions.
-
-    Requires auhorized session (can be created with snaketrade.auth.Auth).
-    """
+    """Get E-Trade account list, balances, transactions, & portfolios."""
 
     def __init__(self, auth):
+        """
+        Create an ETradeAccount instance.
+
+        Parameters
+        ----------
+        auth : snaketrade.auth.ETradeAuth
+            Authenticated ETradeAuth instance.
+
+        Returns
+        -------
+        None.
+
+        """
         self.auth = auth
         self.headers = {'Accept': 'application/json'}
 
