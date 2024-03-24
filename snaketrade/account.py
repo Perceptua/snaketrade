@@ -3,6 +3,7 @@ Classes for reading account data.
 
 Use ETradeAccount to list E-Trade accounts, balances, transactions, &
 portfolios.
+
 """
 from snaketrade.snaketradeutils import SnakeTradeUtils as stu
 import pandas as pd

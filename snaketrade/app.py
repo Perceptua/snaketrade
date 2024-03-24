@@ -1,3 +1,10 @@
+"""
+Snaketrade app.
+
+Minimal Flask app for authenticating to the E-Trade API & viewing snaketrade
+data.
+
+"""
 from flask import Flask, redirect, render_template, request
 from snaketrade.auth import Auth
 

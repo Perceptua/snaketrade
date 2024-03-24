@@ -2,6 +2,7 @@
 Classes for API authorization.
 
 Use ETradeAuth to create authorized sessions to the E-Trade API.
+
 """
 from rauth import OAuth1Service
 import os
